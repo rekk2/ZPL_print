@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Zebra Printer Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+      function clearForm() {
+        document.getElementById("filename").value = "";
+        document.getElementById("zpl").value = "";
+      }
+
+      function handleFormSubmit(event, formId, url) {
+        event.preventDefault();
+        const formData = new FormData(document.getElementById(formId));
+        fetch(url, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('message').innerText = data.message;
+          clearForm();
+        })
+        .catch(error => {
+          document.getElementById('message').innerText = 'Error: ' + error;
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload ZPL to Zebra Printer</h1>
+      <div>
+        <h2>Printer Status: 
+          {% if printer_status == 'green' %}
+            <span style="color: green;">●</span>
+          {% else %}
+            <span style="color: red;">●</span>
+          {% endif %}
+        </h2>
+      </div>
+      <form id="storeForm" onsubmit="handleFormSubmit(event, 'storeForm', '/store')">
+        <div>
+          <label for="filename">File Name:</label>
+          <input type="text" id="filename" name="filename" required>
+        </div>
+        <div>
+          <label for="zpl">ZPL Code:</label>
+          <textarea id="zpl" name="zpl" rows="10" cols="50" required></textarea>
+        </div>
+        <button type="submit">Store</button>
+      </form>
+      
+      <h2>Stored Files</h2>
+      <form id="printForm" onsubmit="handleFormSubmit(event, 'printForm', '/print')">
+        <ul>
+          {% for filename, content in files.items() %}
+          <li>
+            <input type="checkbox" id="{{ filename }}" name="print_filenames" value="{{ filename }}">
+            <label for="{{ filename }}">{{ filename }}</label>
+          {% endfor %}
+        </ul>
+        <button type="submit">Print Selected</button>
+      </form>
+      
+      <p id="message">{% if message %}{{ message }}{% endif %}</p>
+    </div>
+  </body>
+</html>
