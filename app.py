@@ -168,20 +168,36 @@ def print_selected_parts():
     return jsonify({'message': message})
 
 def generate_zpl(part_number, description):
-    zpl_template = """
-    ^XA~TA000~JSN^LT0^MNW^MTD^PON^PMN^LH0,0^JMA^PR5,5~SD10^JUS^LRN^CI0^XZ
+    # Constants for label and font dimensions
+    label_width = 609  # Width of the label in dots
+    char_width = 74    # Width of a single character in dots (based on font size)
+    description_width = 550  # Width for the description field block
+
+    # Calculate the width of the part number text
+    part_number_length = len(part_number)
+    total_text_width = part_number_length * char_width
+
+    # Calculate the centered position for the part number
+    centered_position = (label_width - total_text_width) // 2
+
+    # Adjust this value to fine-tune the left-right position
+    fine_tune_adjustment = 60 # Increase this value to move right, decrease to move left
+    final_position = centered_position - fine_tune_adjustment
+
+    zpl_template = f"""
     ^XA
-    ^MMT
     ^PW609
     ^LL0406
     ^LS0
-    ^FT105,154^A0N,74,76^FH\\^FD{part_number}^FS
-    ^FT49,198^A0N,28,110^FH\\^FD{description}^FS
-    ^BY1,3,81^FT248,373^BCN,,Y,N
-    ^FD>:>{part_number}^FS
-    ^PQ1,0,1,Y^XZ
+    ^FO{final_position},50^A0N,74,76^FD{{part_number}}^FS
+    ^FO30,150^FB{description_width},5,10,C,0^A0N,28,28^FD{{description}}^FS
+    ^FO50,300^BCN,100,Y,N,N
+    ^FD{{part_number}}^FS
+    ^PQ1,0,1,Y
+    ^XZ
     """
     return zpl_template.format(part_number=part_number, description=description)
+
 
 def send_zpl_to_printer(zpl_code):
     url = f"http://{printer_ip}:9100"
