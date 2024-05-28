@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin - Manage Kits and Parts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Admin - Manage Kits and Parts</h1>
+      
+      <form id="storeForm" action="{{ url_for('store_label_data') }}" method="POST" class="form-group">
+        <div>
+          <label for="kit_number">Kit Number:</label>
+          <input type="text" id="kit_number" name="kit_number" required>
+        </div>
+        <div>
+          <label for="part_number">Part Number:</label>
+          <input type="text" id="part_number" name="part_number" required>
+        </div>
+        <div>
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="medium-button">Store</button>
+      </form>
+      
+      <h2>Stored Kits and Parts</h2>
+      {% for kit_number, parts in label_data.items() %}
+      <h3>{{ kit_number }}</h3>
+      <ul>
+        {% for part_number, part_data in parts.items() %}
+        <li>
+          <form action="{{ url_for('delete_label_data') }}" method="POST" style="display: inline;">
+            {{ part_data.part_number }} - {{ part_data.description }}
+            <input type="hidden" name="kit_number" value="{{ kit_number }}">
+            <input type="hidden" name="part_number" value="{{ part_number }}">
+            <button type="submit" class="medium-button">Delete</button>
+          </form>
+          <form action="{{ url_for('move_label_data') }}" method="POST" style="display: inline;">
+            <input type="hidden" name="kit_number" value="{{ kit_number }}">
+            <input type="hidden" name="part_number" value="{{ part_number }}">
+            <button type="submit" name="direction" value="up" class="medium-button">Up</button>
+            <button type="submit" name="direction" value="down" class="medium-button">Down</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+      
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </body>
+</html>
